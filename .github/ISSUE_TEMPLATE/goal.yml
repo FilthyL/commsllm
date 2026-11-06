@@ -1,0 +1,38 @@
+name: Goal (for the agents)
+description: Give Claude and Codex an outcome to deliver. The Lead plans it into tasks and reports back here.
+title: "goal: "
+labels: ["goal"]
+body:
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Outcome
+      description: What should exist when this is done? Write it as the end state, not the steps.
+      placeholder: "A CLI `foo` that converts X to Y, with tests and a README section."
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why / context
+      description: Who it's for and what it's used for. Links to related work.
+  - type: textarea
+    id: done
+    attributes:
+      label: Definition of done
+      description: How you'll judge it. Checkable bullets work best.
+      placeholder: "- `foo --help` works\n- CI green\n- handles empty input"
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints and non-goals
+      description: Stack, folders (e.g. projects/<name>/), things NOT to do, a budget or deadline.
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options: ["P1 next", "P0 now (interrupt current lanes)", "P2 when idle"]
+    validations:
+      required: true
