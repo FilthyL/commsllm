@@ -1,0 +1,17 @@
+[
+  {"name": "comms:bus",      "color": "5319e7", "description": "The always-open coordination PR. Never merge."},
+  {"name": "comms:pause",    "color": "b60205", "description": "Owner kill switch for this PR, or for everything when on the bus PR."},
+  {"name": "goal",           "color": "0e8a16", "description": "Owner goal. The Lead plans it into tasks."},
+  {"name": "task",           "color": "1d76db", "description": "A COMMS task PR ([cl-n] / [cx-n])."},
+  {"name": "needs:owner",    "color": "d93f0b", "description": "Human gate or escalation. The owner must act."},
+  {"name": "next:claude",    "color": "f9d0c4", "description": "Derived: the last COMMS header says next=claude."},
+  {"name": "next:codex",     "color": "c2e0c6", "description": "Derived: the last COMMS header says next=codex."},
+  {"name": "next:owner",     "color": "fbca04", "description": "Derived: the last COMMS header says next=owner."},
+  {"name": "state:building", "color": "bfdadc", "description": "Derived: the Builder is implementing."},
+  {"name": "state:review",   "color": "d4c5f9", "description": "Derived: waiting for a review."},
+  {"name": "state:changes",  "color": "fef2c0", "description": "Derived: changes requested."},
+  {"name": "state:approved", "color": "0e8a16", "description": "Derived: verdict=approve, merge on green."},
+  {"name": "state:blocked",  "color": "e99695", "description": "Derived: blocked on someone."},
+  {"name": "size:S",         "color": "ededed", "description": "Under 150 changed lines."},
+  {"name": "size:M",         "color": "cccccc", "description": "Under 400 changed lines."}
+]
