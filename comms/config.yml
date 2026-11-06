@@ -10,7 +10,7 @@ owner: FilthyL
 lead: claude
 builder: codex
 
-bus_pr: 0                # number of the always-open bus PR (0 = not created yet)
+bus_pr: 2                # number of the always-open bus PR (0 = not created yet)
 
 claude_runner: session   # session = live Claude Code session via PR subscriptions | action = anthropics/claude-code-action
 codex_runner: cloud      # cloud = @codex mentions to Codex cloud | action = openai/codex-action dispatched by the router
