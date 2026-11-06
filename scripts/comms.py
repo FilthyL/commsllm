@@ -28,7 +28,7 @@ def scalar(text):
         if text[-1:] != text[0]:
             raise ValueError('unterminated quoted scalar')
         return json.loads(text) if text[0] == '"' else text[1:-1]
-    if ':' in text or text.startswith(('{', '|', '>')):
+    if text.startswith(('{', '|', '>')):
         raise ValueError('nested maps and multiline values are unsupported')
     return text
 
@@ -96,7 +96,8 @@ def lint():
         try:
             data, lines, body = read_yaml(path, task)
         except (ValueError, OSError) as exc:
-            errors.append(f'{path}:{exc}')
+            detail = str(exc)
+            errors.append(f'{path}:' + (detail if re.match(r'^\d+:', detail) else f'1: {detail}'))
             continue
         def error(key, message):
             errors.append(f'{path}:{lines.get(key, 1)}: {message}')
@@ -189,7 +190,7 @@ def main(argv=None):
             task_id = f'{args.prefix}-{max(numbers, default=0) + 1:03d}'
             template = (directory / '_TEMPLATE.md').read_text()
             for key, value in {'id': task_id, 'title': json.dumps(args.title), 'status': 'draft', 'owner': args.owner}.items():
-                template = re.sub(r'^' + key + r':.*$', f'{key}: {value}', template, flags=re.M)
+                template = re.sub(r'^' + key + r':.*$', lambda _: f'{key}: {value}', template, flags=re.M)
             path = directory / (task_id + '.md')
             with path.open('x') as stream:
                 stream.write(template)
