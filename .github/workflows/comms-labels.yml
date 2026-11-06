@@ -1,0 +1,31 @@
+name: Sync comms labels
+on:
+  push:
+    branches: [main]
+    paths: [comms/labels.json]
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Create or update labels
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import json
+          import subprocess
+          from pathlib import Path
+          for label in json.loads(Path('comms/labels.json').read_text()):
+              subprocess.run(['gh', 'label', 'create', label['name'], '--force',
+                              '--color', label['color'], '--description', label['description']],
+                             check=True)
+          PY
