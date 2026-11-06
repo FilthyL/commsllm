@@ -1,0 +1,25 @@
+name: COMMS watchdog
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+  actions: write
+concurrency:
+  group: comms-live-state
+  cancel-in-progress: false
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          persist-credentials: false
+      - name: Nudge stalled lanes and refresh board
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/router.py watchdog
