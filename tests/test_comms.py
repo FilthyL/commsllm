@@ -104,6 +104,16 @@ class CommsTests(unittest.TestCase):
         self.assertIn('| cl-001 |', output)
         self.assertIn('| cl-006 |', output)
 
+    def test_literal_title_and_missing_config(self):
+        title = r'Windows: C:\new\test'
+        code, path, _ = self.call('new', '--title', title)
+        self.assertEqual(code, 0)
+        self.assertEqual(comms.read_yaml(Path(path.strip()), True)[0]['title'], title)
+        Path('comms/config.yml').unlink()
+        code, _, error = self.call('lint')
+        self.assertEqual(code, 1)
+        self.assertIn('comms/config.yml:1:', error)
+
     def test_help_examples(self):
         for command in ['msg', 'parse', 'lint', 'new', 'board']:
             code, output, _ = self.call(command, '--help')
