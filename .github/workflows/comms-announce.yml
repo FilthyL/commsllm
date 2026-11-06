@@ -1,0 +1,58 @@
+name: Announce PRs and goals
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review]
+  issues:
+    types: [opened, labeled]
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+jobs:
+  announce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+      - name: Notify the bus
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          EVENT_NAME: ${{ github.event_name }}
+          EVENT_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
+          EVENT_TITLE: ${{ github.event.pull_request.title || github.event.issue.title }}
+          EVENT_AUTHOR: ${{ github.event.pull_request.user.login || github.event.issue.user.login }}
+          EVENT_URL: ${{ github.event.pull_request.html_url || github.event.issue.html_url }}
+          ISSUE_LABELS: ${{ toJSON(github.event.issue.labels.*.name) }}
+        run: |
+          set -euo pipefail
+          bus=$(python3 - <<'PY'
+          import re
+          from pathlib import Path
+          text = Path('comms/config.yml').read_text()
+          match = re.search(r'^bus_pr:\s*(\d+)\s*(?:#.*)?$', text, re.M)
+          print(int(match[1]) if match else 0)
+          PY
+          )
+          if [[ "$bus" == 0 ]]; then
+            bus=$(gh pr list --head comms/bus --state open --json number --jq '.[0].number // empty')
+          fi
+          [[ -n "$bus" && "$bus" != "$EVENT_NUMBER" ]] || exit 0
+          if [[ "$EVENT_NAME" == issues ]]; then
+            python3 -c 'import json,os,sys; sys.exit(0 if "goal" in json.loads(os.environ["ISSUE_LABELS"]) else 1)' || exit 0
+            task="goal-$EVENT_NUMBER"
+          elif [[ "$EVENT_TITLE" =~ ^\[(cl-[0-9]+|cx-[0-9]+)\] ]]; then
+            task="${BASH_REMATCH[1]}"
+          else
+            task=bus
+          fi
+          # A configured number can point at a closed or missing bus.
+          state=$(gh pr view "$bus" --json state --jq .state) || exit 0
+          [[ "$state" == OPEN ]] || exit 0
+          body=$(mktemp)
+          trap 'rm -f "$body"' EXIT
+          printf 'COMMS/1 type=notify from=router to=claude task=%s pr=#%s next=claude\n%s by %s — %s\n' \
+            "$task" "$EVENT_NUMBER" "$EVENT_TITLE" "$EVENT_AUTHOR" "$EVENT_URL" > "$body"
+          gh pr comment "$bus" --body-file "$body"
